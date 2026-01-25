@@ -1,3 +1,5 @@
+import { getRandomArrayElement } from '../utils.js';
+
 const pointsMock = [
   {
     "id": "1e07d3b4-0534-4c65-b034-293241e0d89a",
@@ -294,3 +296,5 @@ const pointsMock = [
     "type": "sightseeing"
   }
 ]
+
+export default getPointRandom = () => getRandomArrayElement(pointsMock);

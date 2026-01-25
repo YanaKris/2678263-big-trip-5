@@ -109,3 +109,5 @@ const destinationsMock = [
     ]
   }
 ]
+
+export {destinationsMock};

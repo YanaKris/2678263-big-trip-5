@@ -204,3 +204,5 @@ const offersMock = [
     ]
   }
 ]
+
+export {offersMock};

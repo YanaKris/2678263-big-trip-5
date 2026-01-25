@@ -6,7 +6,7 @@ import PointView from '../view/point-view.js';
 
 import {render} from '../render.js';
 
-const INITIAL_POINTS_COUNT = 3;
+import {INITIAL_POINTS_COUNT} from '../const.js';
 
 export default class BoardPresenter {
 
