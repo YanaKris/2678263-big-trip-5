@@ -1,15 +1,23 @@
-import {createElement} from '../render.js';
+import { createElement } from '../render.js';
+import { getDateAndTimeFromISO } from '../utils.js';
 
 function EditPointTemplate(point) {
   const {
     type = 'flight',
     destinationName = 'Unknown',
+    dateFrom,
+    dateTo,
     basePrice = '',
     resolvedOffers = [],
     destinationDescription = '-',
   } = point || {};
 
-  const offerSelectors = resolvedOffers.map((offer) => `
+  const timeFrom = getDateAndTimeFromISO(dateFrom);
+  const timeTo = getDateAndTimeFromISO(dateTo);
+
+  const offerSelectors = resolvedOffers
+    .map(
+      (offer) => `
     <div class="event__offer-selector">
       <input class="event__offer-checkbox visually-hidden"
              id="event-offer-${offer.id}"
@@ -22,11 +30,12 @@ function EditPointTemplate(point) {
         <span class="event__offer-price">${offer.price}</span>
       </label>
     </div>
-  `).join('');
+  `,
+    )
+    .join('');
 
   const typeIcon = `img/icons/${type.toLowerCase()}.png`;
-  return (
-    `<li class="trip-events__item">
+  return `<li class="trip-events__item">
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
@@ -41,8 +50,19 @@ function EditPointTemplate(point) {
                 <legend class="visually-hidden">Event type</legend>
 
                 <!-- Все типы с динамическим checked -->
-                ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant']
-      .map((eventType) => `
+                ${[
+    'taxi',
+    'bus',
+    'train',
+    'ship',
+    'drive',
+    'flight',
+    'check-in',
+    'sightseeing',
+    'restaurant',
+  ]
+    .map(
+      (eventType) => `
                     <div class="event__type-item">
                       <input
                         id="event-type-${eventType}-1"
@@ -56,7 +76,9 @@ function EditPointTemplate(point) {
                         ${eventType.charAt(0).toUpperCase() + eventType.slice(1)}
                       </label>
                     </div>
-                  `).join('')}
+                  `,
+    )
+    .join('')}
               </fieldset>
             </div>
           </div>
@@ -75,10 +97,10 @@ function EditPointTemplate(point) {
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="18/03/19 12:25">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${timeFrom}>
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="18/03/19 13:35">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${timeTo}>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -109,7 +131,7 @@ function EditPointTemplate(point) {
           </section>
         </section>
     </form>
-     </li>`);
+     </li>`;
 }
 
 export default class EditPointView {

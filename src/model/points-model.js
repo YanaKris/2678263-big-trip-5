@@ -4,22 +4,25 @@ import { offersMock } from '../mock/offers';
 import { destinationsMock } from '../mock/destination';
 
 export default class PointsModel {
+  #points;
+  #offers;
+  #destinations;
   constructor() {
-    this.points = Array.from({ length: INITIAL_POINTS_COUNT }, getPointRandom);
-    this.offers = offersMock;
-    this.destinations = destinationsMock;
+    this.#points = Array.from({ length: INITIAL_POINTS_COUNT }, getPointRandom);
+    this.#offers = offersMock;
+    this.#destinations = destinationsMock;
   }
 
   getPoints() {
-    return this.points;
+    return this.#points;
   }
 
   getOffers() {
-    return this.offers;
+    return this.#offers;
   }
 
   getDestinations() {
-    return this.destinations;
+    return this.#destinations;
   }
 
   getDestinationById(id) {
@@ -32,8 +35,4 @@ export default class PointsModel {
     return allOffers.find((offer) => offer.type === type);
   }
 
-  getOffersById(type, offersId) {
-    const offersTypes = this.getOfferByType(type);
-    return offersTypes.offers.find((offer) => offer.id === offersId);
-  }
 }

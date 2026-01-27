@@ -1,4 +1,5 @@
 import {createElement} from '../render.js';
+import {getFormatDate, getFormatTime, getDuration} from '../utils.js';
 
 function createPointTemplate(point) {
   const {
@@ -11,22 +12,10 @@ function createPointTemplate(point) {
     isFavorite
   } = point;
 
-  const formatDate = (isoString) => {
-    const parts = isoString.split('T')[0].split('-');
-    const month = parts[1];
-    const day = parts[2];
-
-    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-    return `${day} ${monthNames[Number(month) - 1]}`;
-  };
-
-  const formatTime = (isoString) => isoString.split('T')[1].slice(0, 5);
-
-  const dateStr = formatDate(dateFrom);
-  const timeStart = formatTime(dateFrom);
-  const timeEnd = formatTime(dateTo);
-  const duration = '1H 30M';
+  const dateStr = getFormatDate(dateFrom);
+  const timeStart = getFormatTime(dateFrom);
+  const timeEnd = getFormatTime(dateTo);
+  const duration = getDuration(dateFrom, dateTo);
 
   const typeIcon = `img/icons/${type.toLowerCase()}.png`;
   const title = `${type.charAt(0).toUpperCase() + type.slice(1)} ${destinationName}`;

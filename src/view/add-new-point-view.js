@@ -1,14 +1,20 @@
-import {createElement} from '../render.js';
+import { createElement } from '../render.js';
+import { getDateAndTimeFromISO } from '../utils.js';
 
 function createPointEditTemplate(point) {
   const {
     type = 'flight',
     destinationName = 'Unknown',
+    dateFrom,
+    dateTo,
     basePrice = '',
     resolvedOffers = [],
     destinationDescription = '-',
-    destinationPictures = []
+    destinationPictures = [],
   } = point || {};
+
+  const timeFrom = getDateAndTimeFromISO(dateFrom);
+  const timeTo = getDateAndTimeFromISO(dateTo);
 
   const photosHtml = destinationPictures
     .map((picture) => {
@@ -18,7 +24,9 @@ function createPointEditTemplate(point) {
     })
     .join('');
 
-  const offerSelectors = resolvedOffers.map((offer) => `
+  const offerSelectors = resolvedOffers
+    .map(
+      (offer) => `
     <div class="event__offer-selector">
       <input class="event__offer-checkbox visually-hidden"
              id="event-offer-${offer.id}"
@@ -31,12 +39,13 @@ function createPointEditTemplate(point) {
         <span class="event__offer-price">${offer.price}</span>
       </label>
     </div>
-  `).join('');
+  `,
+    )
+    .join('');
 
   const typeIcon = `img/icons/${type.toLowerCase()}.png`;
 
-  return (
-    `<li class="trip-events__item">
+  return `<li class="trip-events__item">
         <form class="event event--edit" action="#" method="post">
           <header class="event__header">
             <div class="event__type-wrapper">
@@ -112,10 +121,10 @@ function createPointEditTemplate(point) {
 
             <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-1">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="19/03/19 00:00">
+              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${timeFrom || ''}>
               &mdash;
               <label class="visually-hidden" for="event-end-time-1">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="19/03/19 00:00">
+              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${timeTo || ''}>
             </div>
 
             <div class="event__field-group  event__field-group--price">
@@ -149,7 +158,7 @@ function createPointEditTemplate(point) {
             </section>
           </section>
         </form>
-      </li>`);
+      </li>`;
 }
 
 export default class AddNewPointView {
