@@ -1,7 +1,7 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getDateAndTimeFromISO } from '../utils.js';
 
-function EditPointTemplate(point) {
+function editPointTemplate(point) {
   const {
     type = 'flight',
     destinationName = 'Unknown',
@@ -134,24 +134,17 @@ function EditPointTemplate(point) {
      </li>`;
 }
 
-export default class EditPointView {
-  constructor({ point = null }) {
-    this.point = point;
+export default class EditPointView extends AbstractView {
+
+  #point = null;
+
+  constructor({point}) {
+    super();
+    this.#point = point;
   }
 
-  getTemplate() {
-    return EditPointTemplate(this.point);
+  get template() {
+    return editPointTemplate(this.#point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
 }
