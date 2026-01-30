@@ -1,9 +1,10 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
+import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 import PointsModel from '../model/points-model.js';
 
-import { render } from '../framework/render.js';
+import { render, replace } from '../framework/render.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -25,9 +26,38 @@ export default class BoardPresenter {
   }
 
   #renderPoint(enrichedPoint) {
-    render(
-      new PointView({ point: enrichedPoint }),
-      this.#pointListComponent.element,
-    );
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+    const pointComponent = new PointView({
+      point: enrichedPoint,
+      onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+    const pointEditComponent = new EditPointView({
+      point: enrichedPoint,
+      onFormSubmit: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+
+    function replaceCardToForm() {
+      replace(pointEditComponent, pointComponent);
+    }
+
+    function replaceFormToCard() {
+      replace(pointComponent, pointEditComponent);
+    }
+
+    render(pointComponent, this.#pointListComponent.element);
   }
 }
