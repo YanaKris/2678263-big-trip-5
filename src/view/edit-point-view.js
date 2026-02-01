@@ -1,7 +1,7 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getDateAndTimeFromISO } from '../utils.js';
 
-function EditPointTemplate(point) {
+function editPointTemplate(point) {
   const {
     type = 'flight',
     destinationName = 'Unknown',
@@ -134,24 +134,39 @@ function EditPointTemplate(point) {
      </li>`;
 }
 
-export default class EditPointView {
-  constructor({ point = null }) {
-    this.point = point;
+export default class EditPointView extends AbstractView {
+  #point = null;
+  #handleFormSubmit = null;
+  #handleRollupClick = null;
+
+  constructor({ point, onFormSubmit, onRollupClick }) {
+    super();
+    this.#point = point;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleRollupClick = onRollupClick;
+    this.#addEventListeners();
   }
 
-  getTemplate() {
-    return EditPointTemplate(this.point);
+  get template() {
+    return editPointTemplate(this.#point);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
+  #addEventListeners() {
+    this.element
+      .querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#rollupClickHandler);
   }
 
-  removeElement() {
-    this.element = null;
-  }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
+
+  #rollupClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRollupClick();
+  };
 }
