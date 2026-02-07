@@ -1,22 +1,26 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
-import EditPointView from '../view/edit-point-view.js';
-import PointView from '../view/point-view.js';
 import PointsModel from '../model/points-model.js';
+import PointPresenter from './point-presenter.js';
+import { updateItem } from '../utils.js';
 
-import { render, replace } from '../framework/render.js';
+import { render } from '../framework/render.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
   #pointsModel = new PointsModel();
   #pointListComponent = new PointListView();
+  #sortComponent = new SortView();
+
+  #boardPoints = [];
+  #pointPresenters = new Map();
 
   constructor({ boardContainer }) {
     this.#boardContainer = boardContainer;
   }
 
   init() {
-    render(new SortView(), this.#boardContainer);
+    render(this.#sortComponent, this.#boardContainer);
     render(this.#pointListComponent, this.#boardContainer);
 
     const enrichedPoints = this.#pointsModel.getEnrichedPoints();
@@ -25,47 +29,22 @@ export default class BoardPresenter {
     });
   }
 
+  #handleTaskChange = (updatedPoint) => {
+    this.#boardPoints = updateItem(this.#boardPoints, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+  };
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #renderPoint(enrichedPoint) {
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToCard();
-      }
-    };
-
-    const handleRollupClick = () => {
-      replaceFormToCard();
-    };
-
-    const handleEditClick = () => {
-      replaceCardToForm();
-      document.addEventListener('keydown', escKeyDownHandler);
-    };
-
-    const handleFormSubmit = () => {
-      replaceFormToCard();
-    };
-
-    const pointComponent = new PointView({
-      point: enrichedPoint,
-      onEditClick: handleEditClick,
+    const pointPresenter = new PointPresenter({
+      pointListContainer: this.#pointListComponent.element,
+      onModeChange: this.#handleModeChange,
+      onDataChange: this.#handleTaskChange
     });
-
-    const pointEditComponent = new EditPointView({
-      point: enrichedPoint,
-      onFormSubmit: handleFormSubmit,
-      onRollupClick: handleRollupClick,
-    });
-
-    function replaceCardToForm() {
-      replace(pointEditComponent, pointComponent);
-    }
-
-    function replaceFormToCard() {
-      replace(pointComponent, pointEditComponent);
-      document.removeEventListener('keydown', escKeyDownHandler);
-    }
-
-    render(pointComponent, this.#pointListComponent.element);
+    pointPresenter.init(enrichedPoint);
+    this.#pointPresenters.set(enrichedPoint.id, pointPresenter);
   }
 }

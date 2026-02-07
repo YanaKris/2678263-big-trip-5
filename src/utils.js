@@ -1,9 +1,13 @@
 import { MONTH_NAMES, MINUTES_IN_DAY, MINUTES_IN_HOUR, MS_IN_MINUTE } from './constants';
-function getRandomArrayElement(items) {
+export function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function getFormatDate(isoString) {
+export function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export function getFormatDate(isoString) {
   const parts = isoString.split('T')[0].split('-');
   const month = parts[1];
   const day = parts[2];
@@ -11,11 +15,11 @@ function getFormatDate(isoString) {
   return `${day} ${MONTH_NAMES[Number(month) - 1]}`;
 }
 
-function getFormatTime(isoString) {
+export function getFormatTime(isoString) {
   return isoString.split('T')[1].slice(0, 5);
 }
 
-function getDuration(startIso, endIso) {
+export function getDuration(startIso, endIso) {
   const start = new Date(startIso);
   const end = new Date(endIso);
 
@@ -48,7 +52,7 @@ function getDuration(startIso, endIso) {
   return parts.length > 0 ? parts.join(' ') : '0M';
 }
 
-function getDateAndTimeFromISO(isoString) {
+export function getDateAndTimeFromISO(isoString) {
   if (!isoString) {
     return '19/03/19 00:00';
   }
@@ -61,4 +65,3 @@ function getDateAndTimeFromISO(isoString) {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export { getRandomArrayElement, getFormatDate, getFormatTime, getDuration, getDateAndTimeFromISO };
