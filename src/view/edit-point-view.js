@@ -1,6 +1,12 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getDateAndTimeFromISO } from '../utils/utils.js';
 
+function createDestinationOptions(destinationNames) {
+  return destinationNames
+    .map((name) => `<option value="${name}"></option>`)
+    .join('');
+}
+
 function editPointTemplate(point) {
   const {
     type = 'flight',
@@ -10,10 +16,23 @@ function editPointTemplate(point) {
     basePrice = '',
     resolvedOffers = [],
     destinationDescription = '-',
+    destinationPictures = [],
   } = point || {};
 
+  const destinationNames = Array.isArray(point.destinations)
+    ? point.destinations.map((dest) => dest.name)
+    : [];
+  console.log('destinationNames in editPointTemplate:', destinationNames);
   const timeFrom = getDateAndTimeFromISO(dateFrom);
   const timeTo = getDateAndTimeFromISO(dateTo);
+
+  const photosHtml = destinationPictures
+    .map((picture) => {
+      const src = picture.src ? picture.src.trim() : '';
+      const alt = picture.description || 'Event photo';
+      return `<img class="event__photo" src="${src}" alt="${alt}">`;
+    })
+    .join('');
 
   const offerSelectors = resolvedOffers
     .map(
@@ -89,9 +108,7 @@ function editPointTemplate(point) {
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${destinationName} list="destination-list-1">
             <datalist id="destination-list-1">
-              <option value="Amsterdam"></option>
-              <option value="Geneva"></option>
-              <option value="Chamonix"></option>
+              ${createDestinationOptions(destinationNames)}
             </datalist>
           </div>
 
@@ -128,6 +145,12 @@ function editPointTemplate(point) {
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
             <p class="event__destination-description">${destinationDescription}</p>
+
+            <div class="event__photos-container">
+              <div class="event__photos-tape">
+                ${photosHtml}
+              </div>
+            </div>
           </section>
         </section>
     </form>
@@ -137,32 +160,43 @@ function editPointTemplate(point) {
 export default class EditPointView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleRollupClick = null;
+  #handleTypeChange = null;
+  #handleDestinationChange = null;
+  #destinations = [];
 
-  constructor({ point, onFormSubmit, onRollupClick }) {
+  constructor({
+    point,
+    destinations,
+    onFormSubmit,
+    onRollupClick,
+    onTypeChange,
+  }) {
     super();
-    console.log('Создание EditPointView', { point });
     this._setState(EditPointView.parsePointToState(point));
-    console.log('Состояние установлено:', this._state);
+    this.#destinations = destinations;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleRollupClick = onRollupClick;
+    this.#handleTypeChange = onTypeChange;
     this._restoreHandlers();
   }
 
   get template() {
-    return editPointTemplate(this._state);
+    const stateWithDestinations = {
+      ...this._state,
+      destinations: this.#destinations,
+    };
+    return editPointTemplate(stateWithDestinations);
   }
 
   _restoreHandlers() {
-    console.log('Восстановление обработчиков');
     const form = this.element.querySelector('form');
-
     form.addEventListener('submit', this.#formSubmitHandler);
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
     form.addEventListener('change', this.#typeChangeHandler);
     form.addEventListener('change', this.#offersChangeHandler);
-    form.addEventListener('input', this.#inputChangeHandler);
+    form.addEventListener('change', this.#destinationChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
@@ -185,45 +219,36 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #offersChangeHandler = (evt) => {
-    if (evt.target.classList.contains('event__offer-checkbox')) {
-      const offerId = evt.target.id.replace('event-offer-', '');
-      const isChecked = evt.target.checked;
-
-      const updatedOffers = this._state.resolvedOffers.map((offer) =>
-        offer.id === offerId ? { ...offer, isChecked } : offer,
-      );
-
+    if (evt.target.classList.contains('event__type-input')) {
+      const type = evt.target.value;
       this.updateElement({
-        resolvedOffers: updatedOffers,
+        type: type,
       });
+      if (this.#handleTypeChange) {
+        const offers = this.#handleTypeChange(type);
+        this.updateElement({
+          resolvedOffers: offers,
+        });
+      }
     }
   };
 
-  #inputChangeHandler = (evt) => {
-    const target = evt.target;
+  #destinationChangeHandler = (evt) => {
+    if (evt.target.classList.contains('event__input--destination')) {
+      const destinationName = evt.target.value;
 
-    switch (target.name) {
-      case 'event-destination':
-        this.updateElement({
-          destinationName: target.value,
-        });
-        break;
-      case 'event-start-time':
-        this.updateElement({
-          timeFrom: target.value,
-        });
-        break;
-      case 'event-end-time':
-        this.updateElement({
-          timeTo: target.value,
-        });
-        break;
-      case 'event-price':
-        this.updateElement({
-          basePrice: target.value,
-        });
-        break;
+      const destination = this.#destinations.find(
+        (dest) => dest.name === destinationName,
+      );
+
+      this.updateElement({
+        destinationName: destinationName,
+        destinationDescription: destination?.description || '-',
+        destinationPictures: destination?.pictures || [],
+      });
     }
+    console.log('destinationChangeHandler', evt.target.value);
+    console.log('destinationChangeHandler', this._state);
   };
 
   static parsePointToState(point) {
@@ -244,10 +269,6 @@ export default class EditPointView extends AbstractStatefulView {
         return offerData;
       });
     }
-    console.log('parsePointToState:', {
-      вход: state,
-      выход: point,
-    });
     return point;
   }
 }

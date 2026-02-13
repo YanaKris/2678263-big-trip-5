@@ -14,11 +14,28 @@ export default class PointPresenter {
 
   #point = null;
   #mode = Mode.DEFAULT;
+  #destinations = [];
 
-  constructor({ pointListContainer, onModeChange, onDataChange }) {
+  #getOffersByType = null;
+  #getDestinationById = null;
+  #getDescriptionById = null;
+
+  constructor({
+    pointListContainer,
+    destinations,
+    onModeChange,
+    onDataChange,
+    getOffersByType,
+    getDestinationById,
+    getDescriptionById,
+  }) {
     this.#pointListContainer = pointListContainer;
+    this.#destinations = destinations;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
+    this.#getOffersByType = getOffersByType;
+    this.#getDestinationById = getDestinationById;
+    this.#getDescriptionById = getDescriptionById;
   }
 
   init(point) {
@@ -35,8 +52,10 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new EditPointView({
       point: this.#point,
+      destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
       onRollupClick: this.#handleRollupClick,
+      onTypeChange: this.#handleTypeChange,
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -104,4 +123,8 @@ export default class PointPresenter {
       isFavorite: !this.#point.isFavorite,
     });
   };
+
+  #handleTypeChange = (type) => this.#getOffersByType(type).offers;
+
+  #handleDestinationChange = (id) => this.#getDestinationById(id).destinations;
 }

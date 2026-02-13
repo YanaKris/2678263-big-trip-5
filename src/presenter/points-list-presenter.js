@@ -9,6 +9,7 @@ import { render, remove, RenderPosition } from '../framework/render.js';
 
 export default class PointsListPresenter {
   #listContainer = null;
+  #destinations = [];
   #points = [];
   #sourcedPoints = [];
   #currentSortType = SortType.DAY;
@@ -19,11 +20,26 @@ export default class PointsListPresenter {
 
   #onPointChange = null;
   #onModeChange = null;
+  #getOffersByType = null;
+  #getDestinationById = null;
+  #getDescriptionById = null;
 
-  constructor({ listContainer, onPointChange, onModeChange }) {
+  constructor({
+    listContainer,
+    destinations,
+    onPointChange,
+    onModeChange,
+    getOffersByType,
+    getDestinationById,
+    getDescriptionById,
+  }) {
     this.#listContainer = listContainer;
+    this.#destinations = destinations;
     this.#onPointChange = onPointChange;
     this.#onModeChange = onModeChange;
+    this.#getOffersByType = getOffersByType;
+    this.#getDestinationById = getDestinationById;
+    this.#getDescriptionById = getDescriptionById;
   }
 
   init(points) {
@@ -63,19 +79,21 @@ export default class PointsListPresenter {
       onSortTypeChange: this.#handleSortTypeChange,
     });
 
-    render(
-      this.#sortComponent,
-      this.#listContainer,
-      RenderPosition.AFTERBEGIN,
-    );
+    render(this.#sortComponent, this.#listContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({
       pointListContainer: this.#pointListComponent.element,
+      destinations: this.#destinations,
       onModeChange: this.#handleModeChange,
       onDataChange: this.#handlePointChange,
+      getOffersByType: (type) => this.#getOffersByType(type),
+      getDestinationById: (id) => this.#getDestinationById(id),
+      getDescriptionById: (id) => this.#getDescriptionById(id),
     });
+    console.log('offerType', this.#getOffersByType(point.type));
+    console.log('destination', this.#getDestinationById(point.destination));
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
