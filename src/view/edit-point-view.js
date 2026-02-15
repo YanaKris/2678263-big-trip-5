@@ -161,7 +161,6 @@ export default class EditPointView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleRollupClick = null;
   #handleTypeChange = null;
-  #handleDestinationChange = null;
   #destinations = [];
   #initialState = null;
 
@@ -202,7 +201,6 @@ export default class EditPointView extends AbstractStatefulView {
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#rollupClickHandler);
     form.addEventListener('change', this.#typeChangeHandler);
-    form.addEventListener('change', this.#offersChangeHandler);
     form.addEventListener('change', this.#destinationChangeHandler);
     form.addEventListener('change', this.#offerCheckedHandler);
   }
@@ -218,14 +216,6 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #typeChangeHandler = (evt) => {
-    if (evt.target.classList.contains('event__type-input')) {
-      this.updateElement({
-        type: evt.target.value,
-      });
-    }
-  };
-
-  #offersChangeHandler = (evt) => {
     if (evt.target.classList.contains('event__type-input')) {
       const type = evt.target.value;
       this.updateElement({

@@ -17,8 +17,6 @@ export default class PointPresenter {
   #destinations = [];
 
   #getOffersByType = null;
-  #getDestinationById = null;
-  #getDescriptionById = null;
 
   constructor({
     pointListContainer,
@@ -26,16 +24,12 @@ export default class PointPresenter {
     onModeChange,
     onDataChange,
     getOffersByType,
-    getDestinationById,
-    getDescriptionById,
   }) {
     this.#pointListContainer = pointListContainer;
     this.#destinations = destinations;
     this.#handleModeChange = onModeChange;
     this.#handleDataChange = onDataChange;
     this.#getOffersByType = getOffersByType;
-    this.#getDestinationById = getDestinationById;
-    this.#getDescriptionById = getDescriptionById;
   }
 
   init(point) {
@@ -127,6 +121,4 @@ export default class PointPresenter {
   };
 
   #handleTypeChange = (type) => this.#getOffersByType(type).offers;
-
-  #handleDestinationChange = (id) => this.#getDestinationById(id).destinations;
 }
