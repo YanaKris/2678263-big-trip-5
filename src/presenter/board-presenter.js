@@ -26,12 +26,7 @@ export default class BoardPresenter {
 
   #handlePointChange = (updatedPoint) => {
     this.#pointsModel.updatePoint(updatedPoint);
-
-    const enrichedPoint = this.#pointsModel
-      .getEnrichedPoints()
-      .find((point) => point.id === updatedPoint.id);
-
-    this.#pointsListPresenter.updatePoint(enrichedPoint);
+    this.#pointsListPresenter.updatePoint(updatedPoint);
   };
 
   #handleModeChange = () => {

@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { getDateAndTimeFromISO } from '../utils/utils.js';
+import { getDateAndTimeFromISO, parseShortDateToISO } from '../utils/utils.js';
 
 function createDestinationOptions(destinationNames) {
   return destinationNames
@@ -206,6 +206,8 @@ export default class EditPointView extends AbstractStatefulView {
     form.addEventListener('change', this.#typeChangeHandler);
     form.addEventListener('change', this.#destinationChangeHandler);
     form.addEventListener('change', this.#offerCheckedHandler);
+    form.addEventListener('change', this.#timeChangeHandler);
+    form.addEventListener('change', this.#priceChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
@@ -221,6 +223,27 @@ export default class EditPointView extends AbstractStatefulView {
   #rollupClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleRollupClick();
+  };
+
+  #priceChangeHandler = (evt) => {
+    if (evt.target.name !== 'event-price') {
+      return;
+    }
+    const newPrice = evt.target.value;
+    this.updateElement({
+      basePrice: newPrice || this._state.basePrice,
+    });
+  };
+
+  #timeChangeHandler = (evt) => {
+    if (evt.target.classList.contains('event__input--time')) {
+      const formElements = evt.currentTarget.elements;
+
+      this.updateElement({
+        dateFrom: parseShortDateToISO(formElements['event-start-time'].value),
+        dateTo: parseShortDateToISO(formElements['event-end-time'].value),
+      });
+    }
   };
 
   #typeChangeHandler = (evt) => {
@@ -293,12 +316,6 @@ export default class EditPointView extends AbstractStatefulView {
         .filter((offer) => offer.isChecked)
         .map((offer) => offer.id);
     }
-
-    delete point.resolvedOffers;
-    delete point.destinationName;
-    delete point.destinationDescription;
-    delete point.destinationPictures;
-    delete point.destinations;
 
     return point;
   }
