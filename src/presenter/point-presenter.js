@@ -65,6 +65,10 @@ export default class PointPresenter {
     if (this.#mode === Mode.EDITING) {
       replace(this.#pointEditComponent, prevPointEditComponent);
     }
+
+    requestAnimationFrame(() => {
+      this.#pointEditComponent.initDatePickers();
+    });
     remove(prevPointComponent);
     remove(prevPointEditComponent);
   }
@@ -84,6 +88,7 @@ export default class PointPresenter {
     replace(this.#pointEditComponent, this.#pointComponent);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
+    this.#pointEditComponent.initDatePickers();
     this.#mode = Mode.EDITING;
   }
 
