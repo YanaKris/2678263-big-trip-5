@@ -1,9 +1,8 @@
-import {
-  MONTH_NAMES,
-  MINUTES_IN_DAY,
-  MINUTES_IN_HOUR,
-  MS_IN_MINUTE,
-} from '../constants';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration.js';
+
+dayjs.extend(duration);
+
 export function getRandomArrayElement(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -13,30 +12,34 @@ export function updateItem(items, update) {
 }
 
 export function getFormatDate(isoString) {
-  const parts = isoString.split('T')[0].split('-');
-  const month = parts[1];
-  const day = parts[2];
+  if (!isoString) {
+    return '';
+  }
 
-  return `${day} ${MONTH_NAMES[Number(month) - 1]}`;
+  return dayjs(isoString).format('DD MMM');
 }
 
 export function getDuration(startIso, endIso) {
-  const start = new Date(startIso);
-  const end = new Date(endIso);
-
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+  if (!startIso || !endIso) {
     return '—';
   }
 
-  const diffMs = end - start;
-  if (diffMs <= 0) {
+  const start = dayjs(startIso);
+  const end = dayjs(endIso);
+
+  if (!start.isValid() || !end.isValid()) {
+    return '—';
+  }
+
+  const diff = dayjs.duration(end.diff(start));
+
+  if (diff.asMilliseconds() <= 0) {
     return '0M';
   }
 
-  const totalMinutes = Math.floor(diffMs / MS_IN_MINUTE);
-  const days = Math.floor(totalMinutes / MINUTES_IN_DAY);
-  const hours = Math.floor((totalMinutes % MINUTES_IN_DAY) / MINUTES_IN_HOUR);
-  const minutes = totalMinutes % MINUTES_IN_HOUR;
+  const days = Math.floor(diff.asDays());
+  const hours = diff.hours();
+  const minutes = diff.minutes();
 
   const parts = [];
 
@@ -50,7 +53,7 @@ export function getDuration(startIso, endIso) {
     parts.push(`${minutes}M`);
   }
 
-  return parts.length > 0 ? parts.join(' ') : '0M';
+  return parts.length ? parts.join(' ') : '0M';
 }
 
 export function getDateAndTimeFromISO(isoString) {
@@ -58,33 +61,13 @@ export function getDateAndTimeFromISO(isoString) {
     return '"19/03/19 00:00"';
   }
 
-  const d = new Date(isoString);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = String(d.getFullYear()).slice(-2);
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `"${day}/${month}/${year} ${hours}:${minutes}"`;
-}
-
-export function parseShortDateToISO(input) {
-  const [datePart, timePart] = input.split(' ');
-  const [day, month, year2d] = datePart.split('/');
-  const [hours, minutes] = timePart.split(':');
-
-  const year = parseInt(year2d, 10) >= 30 ? `19${year2d}` : `20${year2d}`;
-
-  const date = new Date(
-    parseInt(year, 10),
-    parseInt(month, 10) - 1,
-    parseInt(day, 10),
-    parseInt(hours, 10),
-    parseInt(minutes, 10),
-  );
-
-  return date.toISOString();
+  return `"${dayjs(isoString).format('DD/MM/YY HH:mm')}"`;
 }
 
 export function getFormatTime(isoString) {
-  return getDateAndTimeFromISO(isoString).slice(1, -1).split(' ')[1] || '';
+  if (!isoString) {
+    return '';
+  }
+
+  return dayjs(isoString).format('HH:mm');
 }
