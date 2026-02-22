@@ -1,5 +1,6 @@
 import PointsListPresenter from './points-list-presenter.js';
-import { UpdateType, UserAction } from '../constants.js';
+import NewPointPresenter from './new-point-presenter.js';
+import { UpdateType, UserAction, FilterType } from '../constants.js';
 import FilterModel from '../model/filter-model.js';
 
 export default class BoardPresenter {
@@ -7,11 +8,20 @@ export default class BoardPresenter {
   #pointsModel = null;
   #filterModel = new FilterModel();
   #pointsListPresenter = null;
+  #newPointPresenter = null;
+  #isCreatingNewPoint = false;
 
   constructor({ boardContainer, pointsModel, filterModel }) {
     this.#boardContainer = boardContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+
+    this.#newPointPresenter = new NewPointPresenter({
+      listContainer: this.#boardContainer,
+      pointsModel: this.#pointsModel,
+      onDataChange: this.#handleViewAction.bind(this),
+      onDestroy: this.#handleNewPointFormClose,
+    });
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -37,6 +47,21 @@ export default class BoardPresenter {
   get points() {
     return this.#pointsModel.points;
   }
+
+  handleNewEventClick = () => {
+    this.#pointsListPresenter?.handleModeChange?.();
+    if (this.#isCreatingNewPoint) {
+      return;
+    }
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#pointsListPresenter?.handleModeChange?.();
+    this.#isCreatingNewPoint = true;
+    this.#newPointPresenter.init();
+  };
+
+  #handleNewPointFormClose = () => {
+    this.#isCreatingNewPoint = false;
+  };
 
   #handlePointChange = (updateType, updatedPoint) => {
     this.#pointsModel.updatePoint(updateType, updatedPoint);
@@ -95,6 +120,10 @@ export default class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.MAJOR:
+        if (this.#isCreatingNewPoint) {
+          this.#newPointPresenter.destroy();
+          this.#isCreatingNewPoint = false;
+        }
         this.#clearBoard();
         this.#renderBoard();
         break;

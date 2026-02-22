@@ -13,12 +13,12 @@ function createDestinationOptions(destinationNames) {
 function editPointTemplate(point) {
   const {
     type = 'flight',
-    destinationName = 'Unknown',
+    destinationName = '',
     dateFrom,
     dateTo,
     basePrice = '',
     resolvedOffers = [],
-    destinationDescription = '-',
+    destinationDescription = '',
     destinationPictures = [],
   } = point || {};
 
@@ -109,7 +109,15 @@ function editPointTemplate(point) {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${destinationName} list="destination-list-1">
+              <input
+              class="event__input  event__input--destination"
+              id="event-destination-1"
+              type="text"
+              name="event-destination"
+              value="${destinationName}"
+              placeholder="Choose destination"
+              list="destination-list-1"
+            >
             <datalist id="destination-list-1">
               ${createDestinationOptions(destinationNames)}
             </datalist>
@@ -230,7 +238,6 @@ export default class EditPointView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    // console.log("state", this._state);
     this.#handleFormSubmit(EditPointView.parseStateToPoint(this._state));
   };
 
