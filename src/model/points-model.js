@@ -42,24 +42,24 @@ export default class PointsModel extends Observable {
     return allOffers.find((offer) => offer.type === type);
   }
 
-  updatePoint(updatedPoint) {
-    this.#points = this.#points.map((point) =>
-      point.id === updatedPoint.id ? updatedPoint : point,
-    );
-  }
-
-  // updatePoint(updateType, update) {
-  //   const index = this.#points.findIndex((point) => point.id === update.id);
-  //   if (index === -1) {
-  //     throw new Error('Point not found');
-  //   }
-  //   this.#points = [
-  //     ...this.#points.slice(0, index),
-  //     update,
-  //     ...this.#points.slice(index + 1),
-  //   ];
-  //   this._notify(updateType, update);
+  // updatePoint(updatedPoint) {
+  //   this.#points = this.#points.map((point) =>
+  //     point.id === updatedPoint.id ? updatedPoint : point,
+  //   );
   // }
+
+  updatePoint(updateType, update) {
+    const index = this.#points.findIndex((point) => point.id === update.id);
+    if (index === -1) {
+      throw new Error('Point not found');
+    }
+    this.#points = [
+      ...this.#points.slice(0, index),
+      update,
+      ...this.#points.slice(index + 1),
+    ];
+    this._notify(updateType, update);
+  }
 
   addPoint(updateType, point) {
     this.#points = [point, ...this.#points];

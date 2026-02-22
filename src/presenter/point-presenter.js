@@ -1,6 +1,6 @@
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
-import { Mode } from '../constants.js';
+import { Mode, UpdateType, UserAction } from '../constants.js';
 
 import { render, remove, replace } from '../framework/render.js';
 
@@ -71,6 +71,17 @@ export default class PointPresenter {
     });
     remove(prevPointComponent);
     remove(prevPointEditComponent);
+
+    if (this.#pointComponent && this.#pointEditComponent) {
+      this.#pointComponent.update(point);
+      this.#pointEditComponent.update(point);
+    }
+  }
+
+  update(updatedPoint) {
+    this.#point = updatedPoint;
+    this.#pointComponent.update(updatedPoint);
+    this.#pointEditComponent.update(updatedPoint);
   }
 
   destroy() {
@@ -114,8 +125,12 @@ export default class PointPresenter {
     this.#replaceCardToForm();
   };
 
-  #handleFormSubmit = (updatedPoint) => {
-    this.#handleDataChange(updatedPoint);
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point,
+    );
     this.#replaceFormToCard();
   };
 
@@ -125,10 +140,11 @@ export default class PointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({
-      ...this.#point,
-      isFavorite: !this.#point.isFavorite,
-    });
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,
+      {...this.#point, isFavorite: !this.#point.isFavorite},
+    );
   };
 
   #handleTypeChange = (type) => this.#getOffersByType(type).offers;

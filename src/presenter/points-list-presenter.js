@@ -1,7 +1,7 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointPresenter from './point-presenter.js';
-import { updateItem } from '../utils/utils.js';
+// import { updateItem } from '../utils/utils.js';
 import { SORT_FUNCTIONS } from '../utils/sort.js';
 import { SortType } from '../constants.js';
 
@@ -32,6 +32,7 @@ export default class PointsListPresenter {
     getOffersByType,
     getDestinationById,
     getDescriptionById,
+    handleViewAction,
   }) {
     this.#listContainer = listContainer;
     this.#destinations = destinations;
@@ -40,6 +41,7 @@ export default class PointsListPresenter {
     this.#getOffersByType = getOffersByType;
     this.#getDestinationById = getDestinationById;
     this.#getDescriptionById = getDescriptionById;
+    this.#handleViewAction = handleViewAction;
   }
 
   init(points) {
@@ -52,12 +54,14 @@ export default class PointsListPresenter {
     this.#renderPoints();
   }
 
-  #handlePointChange = (updatedPoint) => {
-    this.#points = updateItem(this.#points, updatedPoint);
-    this.#sourcedPoints = updateItem(this.#sourcedPoints, updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
-    this.#onPointChange(updatedPoint);
-  };
+  // #handlePointChange = (updatedPoint) => {
+  //   this.#points = updateItem(this.#points, updatedPoint);
+  //   this.#sourcedPoints = updateItem(this.#sourcedPoints, updatedPoint);
+  //   this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+  //   this.#onPointChange(updatedPoint);
+  // };
+  //раньше было так, меняли в презентере, теперь тянем из модели
+  //возможно метод вернется
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
@@ -74,30 +78,19 @@ export default class PointsListPresenter {
     this.#renderPoints();
   };
 
-  updatePoint(updatedPoint) {
-    const index = this.#points.findIndex(
-      (point) => point.id === updatedPoint.id,
-    );
+  updatePointById(updatedPoint) {
+    this.#pointPresenters.get(updatedPoint.id);
+    // const existingPresenter = this.#pointPresenters.get(updatedPoint.id);
+    // if (!existingPresenter) {
 
-    if (index === -1) {
-      return;
-    }
+    // }
+    // console.log('updatePointById', updatedPoint.id);
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      updatedPoint,
-      ...this.#points.slice(index + 1),
-    ];
+  }
 
-    this.#sourcedPoints = [
-      ...this.#sourcedPoints.slice(0, index),
-      updatedPoint,
-      ...this.#sourcedPoints.slice(index + 1),
-    ];
-
-    this.#pointPresenters
-      .get(updatedPoint.id)
-      .init(updatedPoint);
+  clearAndReRenderPoints() {
+    this.#clearPointList();
+    this.#renderPoints();
   }
 
   #renderSort() {
@@ -113,7 +106,7 @@ export default class PointsListPresenter {
       pointListContainer: this.#pointListComponent.element,
       destinations: this.#destinations,
       onModeChange: this.#handleModeChange,
-      onDataChange: this.#handlePointChange,
+      onDataChange: this.#handleViewAction,
       getOffersByType: (type) => this.#getOffersByType(type),
       getDestinationById: (id) => this.#getDestinationById(id),
       getDescriptionById: (id) => this.#getDescriptionById(id),
@@ -140,4 +133,9 @@ export default class PointsListPresenter {
     this.#clearPointList();
     remove(this.#sortComponent);
   }
+
+  #handleViewAction = (actionType, updateType, update) => {
+    this.#handleViewAction(actionType, updateType, update);
+  };
+
 }
