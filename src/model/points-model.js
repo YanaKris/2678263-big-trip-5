@@ -175,31 +175,4 @@ export default class PointsModel extends Observable {
 
     return adaptedPoint;
   }
-
-  #adaptToServer(point) {
-    const adaptedPoint = {
-      ...point,
-      'base_price': point.basePrice,
-      'date_from': point.dateFrom instanceof Date
-        ? point.dateFrom.toISOString()
-        : point.dateFrom,
-      'date_to': point.dateTo instanceof Date
-        ? point.dateTo.toISOString()
-        : point.dateTo,
-      'is_favorite': point.isFavorite,
-      'destination': typeof point.destination === 'object'
-        ? point.destination.id
-        : point.destination,
-      'offers': Array.isArray(point.offers)
-        ? point.offers.map((offer) => typeof offer === 'object' ? offer.id : offer)
-        : point.offers,
-    };
-
-    delete adaptedPoint.basePrice;
-    delete adaptedPoint.dateFrom;
-    delete adaptedPoint.dateTo;
-    delete adaptedPoint.isFavorite;
-
-    return adaptedPoint;
-  }
 }
