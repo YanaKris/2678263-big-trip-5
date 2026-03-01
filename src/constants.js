@@ -1,5 +1,3 @@
-export const INITIAL_POINTS_COUNT = 5;
-
 export const MONTH_NAMES = [
   'JAN',
   'FEB',
@@ -39,6 +37,7 @@ export const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 export const UserAction = {
