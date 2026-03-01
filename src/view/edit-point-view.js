@@ -175,6 +175,7 @@ export default class EditPointView extends AbstractStatefulView {
   #handleRollupClick = null;
   #handleTypeChange = null;
   #destinations = [];
+  #offersByType = [];
   #initialState = null;
   #datepickerStart = null;
   #datepickerEnd = null;
@@ -182,6 +183,7 @@ export default class EditPointView extends AbstractStatefulView {
   constructor({
     point,
     destinations,
+    offersByType,
     onFormSubmit,
     onDeleteClick,
     onRollupClick,
@@ -189,12 +191,13 @@ export default class EditPointView extends AbstractStatefulView {
   }) {
     super();
 
-    const preparedState = EditPointView.parsePointToState(point);
+    const preparedState = EditPointView.parsePointToState(point, offersByType);
     this._setState(preparedState);
     this.#initialState = structuredClone(preparedState);
 
-    this._setState(EditPointView.parsePointToState(point));
+    this._setState(EditPointView.parsePointToState(point, offersByType));
     this.#destinations = destinations;
+    this.#offersByType = offersByType;
     this.#handleFormSubmit = onFormSubmit;
     this.#handeleDeleteClick = onDeleteClick;
     this.#handleRollupClick = onRollupClick;
@@ -240,6 +243,7 @@ export default class EditPointView extends AbstractStatefulView {
     form.addEventListener('change', this.#destinationChangeHandler);
     form.addEventListener('change', this.#offerCheckedHandler);
     form.addEventListener('change', this.#priceChangeHandler);
+    this.initDatePickers();
   }
 
   #priceInputHandler = (evt) => {
@@ -247,7 +251,13 @@ export default class EditPointView extends AbstractStatefulView {
   };
 
   #priceKeydownHandler = (evt) => {
-    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'];
+    const allowedKeys = [
+      'Backspace',
+      'Delete',
+      'Tab',
+      'ArrowLeft',
+      'ArrowRight',
+    ];
 
     if (!/[0-9]/.test(evt.key) && !allowedKeys.includes(evt.key)) {
       evt.preventDefault();
@@ -288,7 +298,7 @@ export default class EditPointView extends AbstractStatefulView {
     this.#handeleDeleteClick(
       UserAction.DELETE_POINT,
       UpdateType.MINOR,
-      EditPointView.parseStateToPoint(this._state)
+      EditPointView.parseStateToPoint(this._state),
     );
   };
 
@@ -316,7 +326,11 @@ export default class EditPointView extends AbstractStatefulView {
       if (this.#handleTypeChange) {
         const offers = this.#handleTypeChange(type);
         this.updateElement({
-          resolvedOffers: offers,
+          type,
+          resolvedOffers: offers.map((offer) => ({
+            ...offer,
+            isChecked: false,
+          })),
         });
       }
     }
@@ -358,13 +372,13 @@ export default class EditPointView extends AbstractStatefulView {
 
   #dateFromChangeHandler = ([userDate]) => {
     this._setState({
-      dateFrom: userDate.toISOString(),
+      dateFrom: userDate,
     });
   };
 
   #dateToChangeHandler = ([userDate]) => {
     this._setState({
-      dateTo: userDate.toISOString(),
+      dateTo: userDate,
     });
   };
 
@@ -408,11 +422,12 @@ export default class EditPointView extends AbstractStatefulView {
     );
   }
 
-  static parsePointToState(point) {
+  static parsePointToState(point, offersByType) {
     return {
       ...point,
-      resolvedOffers: (point.resolvedOffers || []).map((offer) => ({
+      resolvedOffers: offersByType.map((offer) => ({
         ...offer,
+        isChecked: point.offers.includes(offer.id),
       })),
     };
   }
@@ -425,7 +440,6 @@ export default class EditPointView extends AbstractStatefulView {
         .filter((offer) => offer.isChecked)
         .map((offer) => offer.id);
     }
-
     return point;
   }
 }

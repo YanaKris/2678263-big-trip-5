@@ -154,6 +154,7 @@ export default class PointsModel extends Observable {
   }
 
   #adaptToClient(point) {
+    // console.log('пришло с сервиса',point);
     const adaptedPoint = {
       ...point,
       basePrice: point['base_price'],
@@ -173,6 +174,7 @@ export default class PointsModel extends Observable {
     delete adaptedPoint['date_to'];
     delete adaptedPoint['is_favorite'];
 
+    // console.log('ушло в клиент', adaptedPoint);
     return adaptedPoint;
   }
 }
